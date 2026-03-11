@@ -10,6 +10,7 @@ app.use(
     origin: [
       "https://irrigo-3-0.vercel.app",
       "http://localhost:8080",
+      "https://irrigo-3-0-w3dl7b434-piyushsharmaspsghy-2632s-projects.vercel.app"
     ],
     credentials: true,
   })
