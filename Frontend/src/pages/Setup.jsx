@@ -54,7 +54,7 @@ export default function Setup() {
 
         try {
             const response = await fetch(
-                "http://localhost:7000/api/v1/farm/setup",
+                "https://irrigo3-0.onrender.com/api/v1/farm/setup",
                 {
                     method: "POST",
                     headers: {

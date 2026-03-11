@@ -11,40 +11,58 @@ const Dashboard = () => {
   const [zones, setZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
   const [sprinklerOn, setSprinklerOn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFarmConfig = async () => {
       try {
-        const res = await fetch("http://localhost:7000/api/v1/farm/config", {
-          method: "GET",
-          credentials: "include",
-        });
+        const token = localStorage.getItem("accessToken");
+
+        const res = await fetch(
+          "https://irrigo3-0.onrender.com/api/v1/farm/config",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`Server error ${res.status}`);
+        }
 
         const result = await res.json();
 
         if (!result.success) {
           console.error("Farm config not found");
+          setLoading(false);
           return;
         }
 
-        const numberOfZones = result.data.numberOfZones;
-
         const generatedZones = result.data.zones.map((zone) =>
-  generateZone(zone.zoneNumber, zone.thresholds)
-);
+          generateZone(zone.zoneNumber, zone.thresholds)
+        );
 
         setZones(generatedZones);
         setSelectedZone(generatedZones[0]);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching farm config:", error);
+        setLoading(false);
       }
     };
 
     fetchFarmConfig();
   }, []);
 
-  if (!selectedZone) {
+  if (loading) {
     return <div className="p-6">Loading zones...</div>;
+  }
+
+  if (!selectedZone) {
+    return <div className="p-6">No zones available</div>;
   }
 
   return (
@@ -81,7 +99,7 @@ const Dashboard = () => {
 
                     <div className="flex items-center gap-1">
                       <Activity className="h-3.5 w-3.5 text-primary" />
-                      <span>4 sensors active</span>
+                      <span>{Object.keys(sensorMeta).length} sensors active</span>
                     </div>
                   </div>
                 </div>

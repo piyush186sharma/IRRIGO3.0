@@ -25,8 +25,8 @@ function Auth() {
     try {
 
       const endpoint = isLogin
-        ? "http://localhost:7000/api/v1/users/login"
-        : "http://localhost:7000/api/v1/users/register";
+        ? "https://irrigo3-0.onrender.com/api/v1/users/login"
+        : "https://irrigo3-0.onrender.com/api/v1/users/register";
 
       const body = isLogin
         ? { email, password }
