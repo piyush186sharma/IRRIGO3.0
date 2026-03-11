@@ -8,9 +8,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://ecs-rouge.vercel.app",
+      "https://irrigo3-0-1.onrender.com",
       "http://localhost:8080",
-      "https://ecsnits.in",
     ],
     credentials: true,
   })
