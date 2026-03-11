@@ -8,7 +8,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://irrigo3-0-1.onrender.com",
+      "https://irrigo-3-0.vercel.app",
       "http://localhost:8080",
     ],
     credentials: true,
