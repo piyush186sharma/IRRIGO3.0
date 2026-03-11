@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Activity, Droplets } from "lucide-react";
+import { Clock, Activity, Droplets, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ZoneSidebar from "@/components/ZoneSidebar";
 import TopNavbar from "@/components/TopNavbar";
@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [selectedZone, setSelectedZone] = useState(null);
   const [sprinklerOn, setSprinklerOn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false); // mobile zone dropdown
 
   useEffect(() => {
     const fetchFarmConfig = async () => {
@@ -29,12 +30,9 @@ const Dashboard = () => {
           }
         );
 
-        if (!res.ok) {
-          throw new Error(`Server error ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Server error ${res.status}`);
 
         const result = await res.json();
-
         if (!result.success) {
           console.error("Farm config not found");
           setLoading(false);
@@ -57,24 +55,55 @@ const Dashboard = () => {
     fetchFarmConfig();
   }, []);
 
-  if (loading) {
-    return <div className="p-6">Loading zones...</div>;
-  }
-
-  if (!selectedZone) {
-    return <div className="p-6">No zones available</div>;
-  }
+  if (loading) return <div className="p-6">Loading zones...</div>;
+  if (!selectedZone) return <div className="p-6">No zones available</div>;
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background grid-pattern">
-      <ZoneSidebar
-        zones={zones}
-        selectedZone={selectedZone}
-        onSelectZone={setSelectedZone}
-      />
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex">
+        <ZoneSidebar
+          zones={zones}
+          selectedZone={selectedZone}
+          onSelectZone={setSelectedZone}
+        />
+      </div>
 
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavbar />
+
+        {/* Mobile Zone Dropdown */}
+        <div className="md:hidden p-4">
+          <div className="relative">
+            <Button
+              variant="outline"
+              className="w-full flex justify-between items-center"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              {selectedZone.name}
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 overflow-hidden">
+                {zones.map((zone) => (
+                  <button
+                    key={zone.id}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-accent/20 ${
+                      zone.id === selectedZone.id ? "font-semibold" : ""
+                    }`}
+                    onClick={() => {
+                      setSelectedZone(zone);
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    {zone.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         <main className="flex-1 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
@@ -85,6 +114,7 @@ const Dashboard = () => {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Zone Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-foreground tracking-tight">
@@ -113,6 +143,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              {/* Sprinkler Control */}
               <div className="mb-6">
                 <Button
                   onClick={() => setSprinklerOn(!sprinklerOn)}
@@ -124,7 +155,8 @@ const Dashboard = () => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+              {/* Sensor Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 {Object.keys(sensorMeta).map((type, i) => (
                   <SensorCard
                     key={type}
@@ -135,6 +167,7 @@ const Dashboard = () => {
                 ))}
               </div>
 
+              {/* Zone Health Summary */}
               <div className="mt-6 rounded-lg border border-border bg-card/50 p-5">
                 <h3 className="text-sm font-semibold text-foreground mb-3">
                   Zone Health Summary
@@ -161,7 +194,6 @@ const Dashboard = () => {
                           <p className="text-xs text-muted-foreground">
                             {meta.label}
                           </p>
-
                           <p className="text-sm font-medium font-mono text-foreground">
                             {reading.value}
                             {reading.unit}

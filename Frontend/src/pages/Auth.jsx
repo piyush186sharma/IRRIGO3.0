@@ -106,7 +106,7 @@ function Auth() {
             </div>
 
             <h1 className="text-2xl font-bold text-foreground">
-              AgriSense
+              IRRIGO
             </h1>
 
           </div>
