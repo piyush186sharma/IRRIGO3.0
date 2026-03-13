@@ -10,15 +10,7 @@ import userRouter from "./routes/user.routes.js";
 
 const app = express();
 
-// Rate limiter
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: "Too many requests. Please try again later.",
-});
-
-app.use("/api", apiLimiter);
-
+// CORS first
 app.use(
   cors({
     origin: [
@@ -29,6 +21,15 @@ app.use(
     credentials: true,
   })
 );
+
+// Rate limiter after CORS
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100, // increase this
+  message: "Too many requests. Please try again later.",
+});
+
+app.use("/api", apiLimiter);
 
 // Middlewares
 app.use(express.json({ limit: "16kb" }));
