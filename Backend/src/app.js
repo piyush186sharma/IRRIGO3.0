@@ -1,9 +1,23 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
+
 import farmRoutes from "./routes/farm.routes.js";
-import sensorRoutes from "./routes/sensorRoutes.js"
+import sensorRoutes from "./routes/sensorRoutes.js";
+import healthcheckRouter from "./routes/healthcheck.routes.js";
+import userRouter from "./routes/user.routes.js";
+
 const app = express();
+
+// Rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Too many requests. Please try again later.",
+});
+
+app.use("/api", apiLimiter);
 
 app.use(
   cors({
@@ -16,19 +30,14 @@ app.use(
   })
 );
 
-// Common Middlewares
+// Middlewares
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
 // Routes
-import healthcheckRouter from "./routes/healthcheck.routes.js";
-import userRouter from "./routes/user.routes.js";
-// import registrationRouter from "./routes/registrationRoutes.js";
-
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/users", userRouter);
-// app.use("/api/v1/registrations", registrationRouter);
 app.use("/api/v1/farm", farmRoutes);
 app.use("/api/v1/mail", sensorRoutes);
 
