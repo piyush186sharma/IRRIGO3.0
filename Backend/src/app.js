@@ -10,7 +10,6 @@ import userRouter from "./routes/user.routes.js";
 
 const app = express();
 
-// CORS first
 app.use(
   cors({
     origin: [
@@ -22,21 +21,18 @@ app.use(
   })
 );
 
-// Rate limiter after CORS
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100, // increase this
+  max: 100, 
   message: "Too many requests. Please try again later.",
 });
 
 app.use("/api", apiLimiter);
 
-// Middlewares
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
-// Routes
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/farm", farmRoutes);
