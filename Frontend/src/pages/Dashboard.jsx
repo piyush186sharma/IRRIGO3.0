@@ -6,13 +6,15 @@ import ZoneSidebar from "@/components/ZoneSidebar";
 import TopNavbar from "@/components/TopNavbar";
 import SensorCard from "@/components/SensorCard";
 import { sensorMeta, generateZone } from "@/data/sensorData";
+import Loader from "@/components/IrrigoHero.jsx";
+import CherryBlossomFall from "@/components/cherryBlossom.jsx";
 
 const Dashboard = () => {
   const [zones, setZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
   const [sprinklerOn, setSprinklerOn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [dropdownOpen, setDropdownOpen] = useState(false); // mobile zone dropdown
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const fetchFarmConfig = async () => {
@@ -55,11 +57,23 @@ const Dashboard = () => {
     fetchFarmConfig();
   }, []);
 
-  if (loading) return <div className="p-6">Loading zones...</div>;
+  // 🔥 SHOW LOADER + LEAVES
+  if (loading)
+    return (
+      <>
+        <Loader />
+        <CherryBlossomFall />
+      </>
+    );
+
   if (!selectedZone) return <div className="p-6">No zones available</div>;
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background grid-pattern">
+      
+      {/* 🌿 LEAF ANIMATION */}
+      <CherryBlossomFall />
+
       {/* Desktop Sidebar */}
       <div className="hidden md:flex">
         <ZoneSidebar
@@ -138,7 +152,6 @@ const Dashboard = () => {
                   <span className="text-xs text-muted-foreground px-3 py-1.5 rounded-md bg-secondary border border-border font-mono">
                     LIVE
                   </span>
-
                   <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse-glow" />
                 </div>
               </div>
