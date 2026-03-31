@@ -22,7 +22,7 @@ const Loader = () => {
 
         {/* 🔤 IRRIGO Text */}
         <div className="text">
-          {"IRRIGO".split("").map((letter, i) => (
+          {"READY TO GO".split("").map((letter, i) => (
             <span key={i} className="loader-letter">
               {letter}
             </span>

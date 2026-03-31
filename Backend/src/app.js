@@ -7,7 +7,7 @@ import farmRoutes from "./routes/farm.routes.js";
 import sensorRoutes from "./routes/sensorRoutes.js";
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import userRouter from "./routes/user.routes.js";
-
+import irrigationRoutes from "./routes/irrigationRoutes.js";
 const app = express();
 
 app.use(
@@ -38,4 +38,5 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/farm", farmRoutes);
 app.use("/api/v1/mail", sensorRoutes);
 
+app.use("/api/v1/irrigation", irrigationRoutes);
 export { app };

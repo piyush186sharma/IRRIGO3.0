@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 
 const sensorThresholdSchema = new mongoose.Schema({
-  Pottasium: { type: Number, required: true },
+  Potassium: { type: Number, required: true },
   Nitrate: { type: Number, required: true },
-  soilMoisture: { type: Number, required: true }
+  Phosphorus: { type: Number, required: true },
+  Temperature: { type: Number, required: true },
+  Ph: { type: Number, required: true },
+  soilMoisture: { type: Number, required: true },
   
 });
 

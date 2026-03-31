@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Setup from "./pages/Setup";
+import CropRecommendation from "./pages/cropRecomendation";
 import Loader from "@/components/IrrigoHero.jsx";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -50,6 +51,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/predict"
+              element={
+                <ProtectedRoute>
+                  <CropRecommendation/>
                 </ProtectedRoute>
               }
             />

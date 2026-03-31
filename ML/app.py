@@ -1,8 +1,14 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 import numpy as np
 
 app = Flask(__name__)
+
+# ✅ IMPORTANT: enable CORS properly
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+model = pickle.load(open("model/crop_model.pkl","rb"))
 
 model = pickle.load(open("model/crop_model.pkl","rb"))
 

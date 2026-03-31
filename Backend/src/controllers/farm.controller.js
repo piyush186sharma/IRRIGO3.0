@@ -1,43 +1,47 @@
 import { FarmConfig } from "../models/farmConfig.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-// Save Farm Setup
 export const saveFarmSetup = asyncHandler(async (req, res) => {
   const { numberOfZones, zones } = req.body;
 
-  console.log("Request Body:", req.body);
+  console.log("FULL BODY:", JSON.stringify(req.body, null, 2));
 
-  // Basic validation
   if (!numberOfZones || !zones || !Array.isArray(zones) || zones.length === 0) {
     throw new Error("Zones and thresholds are required");
   }
 
-  // Validate each zone
+  const requiredFields = [
+    "Nitrate",
+    "Potassium",
+    "Phosphorus",
+    "Ph",
+    "Temperature",
+    "soilMoisture"
+  ];
+
   zones.forEach((zone) => {
-    if (
-      !zone.zoneNumber ||
-      !zone.thresholds ||
-      zone.thresholds.Nitrate === undefined ||
-      zone.thresholds.Pottasium === undefined ||
-      zone.thresholds.soilMoisture === undefined
-    ) {
-      throw new Error(`Invalid thresholds for zone ${zone.zoneNumber}`);
+    if (!zone.zoneNumber || !zone.thresholds) {
+      throw new Error(`Invalid zone structure`);
     }
+
+    const t = zone.thresholds;
+
+    requiredFields.forEach((field) => {
+      if (t[field] === undefined || t[field] === null || isNaN(t[field])) {
+        throw new Error(`Invalid thresholds for zone ${zone.zoneNumber}`);
+      }
+    });
   });
 
   const userId = req.user._id;
 
-  // Check if farm already exists
   let farm = await FarmConfig.findOne({ userId });
 
   if (farm) {
-    // Update existing farm
     farm.numberOfZones = numberOfZones;
     farm.zones = zones;
-
     await farm.save();
   } else {
-    // Create new farm config
     farm = await FarmConfig.create({
       userId,
       numberOfZones,
@@ -52,7 +56,6 @@ export const saveFarmSetup = asyncHandler(async (req, res) => {
   });
 });
 
-// Get Farm Config
 export const getFarmConfig = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 

@@ -5,59 +5,128 @@ import { Button } from "@/components/ui/button";
 import ZoneSidebar from "@/components/ZoneSidebar";
 import TopNavbar from "@/components/TopNavbar";
 import SensorCard from "@/components/SensorCard";
-import { sensorMeta, generateZone } from "@/data/sensorData";
+import { sensorMeta } from "@/data/sensorData.jsx";
 import Loader from "@/components/IrrigoHero.jsx";
 import CherryBlossomFall from "@/components/cherryBlossom.jsx";
+
+// 🔥 FIREBASE
+import { database } from "../firebase/firebase.js";
+import { ref, onValue, set } from "firebase/database";
 
 const Dashboard = () => {
   const [zones, setZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
   const [sprinklerOn, setSprinklerOn] = useState(false);
+  const [mode, setMode] = useState("manual"); // ✅ NEW STATE
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  // 🔥 FIREBASE REALTIME LISTENER
   useEffect(() => {
-    const fetchFarmConfig = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
+    const zonesRef = ref(database, "zones");
 
-        const res = await fetch(
-          "https://irrigo3-0.onrender.com/api/v1/farm/config",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+    const unsubscribe = onValue(zonesRef, (snapshot) => {
+      const data = snapshot.val();
 
-        if (!res.ok) throw new Error(`Server error ${res.status}`);
-
-        const result = await res.json();
-        if (!result.success) {
-          console.error("Farm config not found");
-          setLoading(false);
-          return;
-        }
-
-        const generatedZones = result.data.zones.map((zone) =>
-          generateZone(zone.zoneNumber, zone.thresholds)
-        );
-
-        setZones(generatedZones);
-        setSelectedZone(generatedZones[0]);
+      if (!data) {
+        console.log("No Firebase data");
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching farm config:", error);
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchFarmConfig();
+      console.log("Zones Data:", data);
+
+      const zonesArray = Object.keys(data).map((key) => {
+        const zoneData = data[key];
+
+        return {
+          id: key,
+          name: key.toUpperCase(),
+          lastUpdated: "Just now",
+          sprinkler: zoneData.Sprinkler === 1,
+          mode: zoneData.mode || "manual", // ✅ READ MODE
+
+          sensors: {
+            moisture: {
+              value: zoneData.Humidity || 0,
+              unit: "%",
+              status: "optimal",
+              trend: "up",
+            },
+            ph: {
+              value: zoneData.ph || 0,
+              unit: "",
+              status: "optimal",
+              trend: "stable",
+            },
+            nitrogen: {
+              value: zoneData.Nitrogen || 0,
+              unit: "ppm",
+              status: "optimal",
+              trend: "up",
+            },
+            potassium: {
+              value: zoneData.Potassium || 0,
+              unit: "ppm",
+              status: "optimal",
+              trend: "stable",
+            },
+            rainfall: {
+              value: zoneData.Rainfall || 0,
+              unit: "mm",
+              status: "optimal",
+              trend: "stable",
+            },
+            temperature: {
+              value: zoneData.Temperature || 0,
+              unit: "°C",
+              status: "optimal",
+              trend: "up",
+            },
+            phosphorus: {
+              value: zoneData.Phosphorus || 0,
+              unit: "ppm",
+              status: "optimal",
+              trend: "up",
+            },
+            ec: {
+              value: zoneData.EC || 0,
+              unit: "",
+              status: "optimal",
+              trend: "up",
+            },
+          },
+        };
+      });
+
+      setZones(zonesArray);
+
+      setSelectedZone((prev) => {
+        if (!prev) return zonesArray[0];
+        return zonesArray.find((z) => z.id === prev.id) || zonesArray[0];
+      });
+
+      setLoading(false);
+    });
+
+    return () => unsubscribe(); // ✅ cleanup
   }, []);
 
-  // 🔥 SHOW LOADER + LEAVES
+  // ✅ Sync sprinkler
+  useEffect(() => {
+    if (selectedZone) {
+      setSprinklerOn(selectedZone.sprinkler);
+    }
+  }, [selectedZone]);
+
+  // ✅ Sync mode
+  useEffect(() => {
+    if (selectedZone) {
+      setMode(selectedZone.mode || "manual");
+    }
+  }, [selectedZone]);
+
+  // 🔥 LOADER
   if (loading)
     return (
       <>
@@ -70,11 +139,10 @@ const Dashboard = () => {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background grid-pattern">
-      
-      {/* 🌿 LEAF ANIMATION */}
+
       <CherryBlossomFall />
 
-      {/* Desktop Sidebar */}
+      {/* Sidebar */}
       <div className="hidden md:flex">
         <ZoneSidebar
           zones={zones}
@@ -86,7 +154,7 @@ const Dashboard = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavbar />
 
-        {/* Mobile Zone Dropdown */}
+        {/* Mobile Dropdown */}
         <div className="md:hidden p-4">
           <div className="relative">
             <Button
@@ -128,43 +196,61 @@ const Dashboard = () => {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Zone Header */}
+
+              {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                  <h2 className="text-2xl font-bold">
                     {selectedZone.name}
                   </h2>
 
                   <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>Updated {selectedZone.lastUpdated}</span>
-                    </div>
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Updated {selectedZone.lastUpdated}</span>
 
-                    <div className="flex items-center gap-1">
-                      <Activity className="h-3.5 w-3.5 text-primary" />
-                      <span>{Object.keys(sensorMeta).length} sensors active</span>
-                    </div>
+                    <Activity className="h-3.5 w-3.5 text-primary" />
+                    <span>{Object.keys(sensorMeta).length} sensors active</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground px-3 py-1.5 rounded-md bg-secondary border border-border font-mono">
-                    LIVE
-                  </span>
-                  <div className="h-2.5 w-2.5 rounded-full bg-primary animate-pulse-glow" />
-                </div>
+                <span className="text-xs px-3 py-1.5 bg-secondary border rounded-md">
+                  LIVE
+                </span>
               </div>
 
-              {/* Sprinkler Control */}
-              <div className="mb-6">
+              {/* 🔥 BUTTONS */}
+              <div className="mb-6 flex gap-3">
+                {/* Sprinkler */}
                 <Button
-                  onClick={() => setSprinklerOn(!sprinklerOn)}
+                  onClick={() => {
+                    const newState = !sprinklerOn;
+                    setSprinklerOn(newState);
+
+                    set(
+                      ref(database, `zones/${selectedZone.id}/Sprinkler`),
+                      newState ? 1 : 0
+                    );
+                  }}
                   variant={sprinklerOn ? "default" : "outline"}
-                  className="flex items-center gap-2"
                 >
                   <Droplets className="h-4 w-4" />
                   {sprinklerOn ? "Sprinkler On" : "Sprinkler Off"}
+                </Button>
+
+                {/* Mode */}
+                <Button
+                  onClick={() => {
+                    const newMode = mode === "manual" ? "auto" : "manual";
+                    setMode(newMode);
+
+                    set(
+                      ref(database, `zones/${selectedZone.id}/mode`),
+                      newMode
+                    );
+                  }}
+                  variant={mode === "auto" ? "default" : "outline"}
+                >
+                  {mode === "auto" ? "Auto Mode" : "Manual Mode"}
                 </Button>
               </div>
 
@@ -180,43 +266,6 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              {/* Zone Health Summary */}
-              <div className="mt-6 rounded-lg border border-border bg-card/50 p-5">
-                <h3 className="text-sm font-semibold text-foreground mb-3">
-                  Zone Health Summary
-                </h3>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.keys(sensorMeta).map((type) => {
-                    const reading = selectedZone.sensors[type];
-                    const meta = sensorMeta[type];
-
-                    return (
-                      <div key={type} className="flex items-center gap-3">
-                        <div
-                          className={`h-3 w-3 rounded-full ${
-                            reading.status === "optimal"
-                              ? "bg-primary"
-                              : reading.status === "warning"
-                              ? "bg-accent"
-                              : "bg-destructive"
-                          }`}
-                        />
-
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            {meta.label}
-                          </p>
-                          <p className="text-sm font-medium font-mono text-foreground">
-                            {reading.value}
-                            {reading.unit}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             </motion.div>
           </AnimatePresence>
         </main>
