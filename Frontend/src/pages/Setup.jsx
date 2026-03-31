@@ -13,7 +13,7 @@ export default function Setup() {
     const navigate = useNavigate();
 
     const createEmptyThresholds = () => ({
-        Nitrate: "",
+        Nitrogen: "",
         Potassium: "",
         Phosphorus: "",
         Ph: "",

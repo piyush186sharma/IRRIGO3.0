@@ -11,7 +11,7 @@ export const saveFarmSetup = asyncHandler(async (req, res) => {
   }
 
   const requiredFields = [
-    "Nitrate",
+    "Nitrogen",
     "Potassium",
     "Phosphorus",
     "Ph",
