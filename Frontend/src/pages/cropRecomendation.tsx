@@ -283,7 +283,7 @@ export default function CropRecommendation() {
             </div>
             <div>
               <h1 style={{ fontSize: 14, fontWeight: 700, letterSpacing: "0.05em", margin: 0 }}>
-                CropAI
+                IRRIGOAI
               </h1>
               <p style={{ fontSize: 10, color: THEME.fgMuted, textTransform: "uppercase", letterSpacing: "0.12em", margin: 0 }}>
                 Smart Crop Advisor

@@ -47,12 +47,15 @@ const TopNavbar = () => {
       <div className="flex items-center gap-1">
 
         {/* AI Button */}
-        <button className="relative h-9 w-9 rounded-md flex items-center justify-center hover:bg-secondary transition-colors group">
-          <Bot className="h-4.5 w-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
-          <span className="absolute -top-0.5 -right-0.5 text-[9px] bg-primary text-primary-foreground rounded px-1 font-bold">
-            AI
-          </span>
-        </button>
+        <button
+  onClick={() => navigate("/predict")}
+  className="relative h-9 w-9 rounded-md flex items-center justify-center hover:bg-secondary transition-colors group"
+>
+  <Bot className="h-4.5 w-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+  <span className="absolute -top-0.5 -right-0.5 text-[9px] bg-primary text-primary-foreground rounded px-1 font-bold">
+    AI
+  </span>
+</button>
 
         {/* Notification Button */}
         <button className="relative h-9 w-9 rounded-md flex items-center justify-center hover:bg-secondary transition-colors group">
