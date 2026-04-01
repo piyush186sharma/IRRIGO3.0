@@ -1,8 +1,8 @@
-import express from "express";
-import { checkSensorAndNotify } from "../controllers/sensorController.js";
+// import express from "express";
+// import { checkSensorAndNotify } from "../controllers/sensorController.js";
 
-const router = express.Router();
+// const router = express.Router();
 
-router.post("/", checkSensorAndNotify);
+// router.post("/", checkSensorAndNotify);
 
-export default router;
+// export default router;

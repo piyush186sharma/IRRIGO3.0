@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 
 import farmRoutes from "./routes/farm.routes.js";
-import sensorRoutes from "./routes/sensorRoutes.js";
+// import sensorRoutes from "./routes/sensorRoutes.js";
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import userRouter from "./routes/user.routes.js";
 import irrigationRoutes from "./routes/irrigationRoutes.js";
@@ -36,7 +36,7 @@ app.use(cookieParser());
 app.use("/api/v1/healthcheck", healthcheckRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/farm", farmRoutes);
-app.use("/api/v1/mail", sensorRoutes);
+// app.use("/api/v1/mail", sensorRoutes);
 
 app.use("/api/v1/irrigation", irrigationRoutes);
 export { app };
