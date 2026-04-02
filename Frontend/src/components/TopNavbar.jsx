@@ -58,10 +58,10 @@ const TopNavbar = () => {
 </button>
 
         {/* Notification Button */}
-        <button className="relative h-9 w-9 rounded-md flex items-center justify-center hover:bg-secondary transition-colors group">
+        {/* <button className="relative h-9 w-9 rounded-md flex items-center justify-center hover:bg-secondary transition-colors group">
           <Bell className="h-4.5 w-4.5 text-muted-foreground group-hover:text-foreground transition-colors" />
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-accent" />
-        </button>
+        </button> */}
 
         <div className="w-px h-6 bg-border mx-2" />
 

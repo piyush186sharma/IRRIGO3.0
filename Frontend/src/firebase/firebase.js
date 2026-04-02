@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,8 +15,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Realtime Database
+// Initialize DB
 const database = getDatabase(app);
 
-export { database };
+// ✅ Export everything needed
+export { database, ref, onValue };
 export default app;
