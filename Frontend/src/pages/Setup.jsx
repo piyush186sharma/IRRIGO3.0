@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, Save, Thermometer, Droplets, Leaf } from "lucide-react";
+import { Plus, Save, Thermometer, Droplets, Leaf, Wand2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,49 @@ export default function Setup() {
         setZones(newZones);
     };
 
+    // 🔥 NEW: Auto-fill per zone
+    const autoFillZone = async (index) => {
+        const crop = prompt("Enter crop name (e.g. rice, wheat)");
+
+        if (!crop) return;
+
+        try {
+            const res = await fetch("https://irrigo3-0-1.onrender.com/recommend", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ crop: crop.toLowerCase() })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.error || "Error fetching thresholds");
+                return;
+            }
+
+            const t = data.recommended_thresholds;
+
+            const newZones = [...zones];
+
+            newZones[index].thresholds = {
+                Nitrogen: Math.round(t.N),
+                Phosphorus: Math.round(t.P),
+                Potassium: Math.round(t.K),
+                Temperature: Math.round(t.temperature),
+                Ph: Number(t.ph.toFixed(1)),
+                soilMoisture: Math.round(t.humidity)
+            };
+
+            setZones(newZones);
+
+        } catch (err) {
+            console.error(err);
+            alert("ML server error");
+        }
+    };
+
     const validateZones = () => {
         for (let z of zones) {
             for (let key in z.thresholds) {
@@ -68,8 +111,6 @@ export default function Setup() {
             numberOfZones: zones.length,
             zones: zones
         };
-
-        console.log("Sending payload:", payload);
 
         try {
             const response = await fetch(
@@ -123,17 +164,28 @@ export default function Setup() {
                             key={index}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
                         >
                             <Card className="glow-border">
                                 <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <div className="h-6 w-6 rounded bg-primary/10 border flex items-center justify-center">
-                                            <span className="text-xs text-primary">
-                                                {zone.zoneNumber}
-                                            </span>
+                                    <CardTitle className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-6 w-6 rounded bg-primary/10 border flex items-center justify-center">
+                                                <span className="text-xs text-primary">
+                                                    {zone.zoneNumber}
+                                                </span>
+                                            </div>
+                                            Zone {zone.zoneNumber}
                                         </div>
-                                        Zone {zone.zoneNumber}
+
+                                        {/* 🔥 Auto Fill Button */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => autoFillZone(index)}
+                                        >
+                                            <Wand2 className="h-3 w-3 mr-1" />
+                                            Auto Fill
+                                        </Button>
                                     </CardTitle>
                                 </CardHeader>
 
@@ -150,10 +202,7 @@ export default function Setup() {
                                                     <Input
                                                         type="number"
                                                         min="0"
-                                                        placeholder="Enter value"
-                                                        value={
-                                                            zone.thresholds[key]
-                                                        }
+                                                        value={zone.thresholds[key]}
                                                         onChange={(e) =>
                                                             updateZone(
                                                                 index,

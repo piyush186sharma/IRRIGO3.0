@@ -5,12 +5,15 @@ import numpy as np
 
 app = Flask(__name__)
 
-# ✅ IMPORTANT: enable CORS properly
+
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-model = pickle.load(open("model/crop_model.pkl","rb"))
 
-model = pickle.load(open("model/crop_model.pkl","rb"))
+model = pickle.load(open("model/crop_model.pkl", "rb"))
+
+
+profiles = pickle.load(open("model/crop_profiles.pkl", "rb"))
+
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -37,8 +40,24 @@ def predict():
 
     return jsonify({
         "recommended_crop": prediction[0],
-        "confidence": round(confidence,2),
+        "confidence": round(confidence, 2),
         "top3_recommendations": top3_crops
+    })
+
+@app.route("/recommend", methods=["POST"])
+def recommend():
+
+    data = request.json
+    crop = data.get("crop")
+
+    if crop not in profiles.index:
+        return jsonify({"error": "Crop not found"}), 404
+
+    result = profiles.loc[crop].to_dict()
+
+    return jsonify({
+        "crop": crop,
+        "recommended_thresholds": result
     })
 
 if __name__ == "__main__":
