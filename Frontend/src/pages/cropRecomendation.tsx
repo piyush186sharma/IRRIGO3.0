@@ -3,8 +3,11 @@ import {
   Leaf, Droplets, Thermometer, Cloud, FlaskConical,
   Sprout, Trophy, Search, Bell, Zap,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /* ───────────────────────────── CONFIG ───────────────────────────── */
+// const navigate = useNavigate();
+
 
 const PARAMETERS = [
   { key: "nitrogen", label: "Nitrogen (N)", icon: FlaskConical, unit: "mg/kg", placeholder: "90" },
@@ -203,6 +206,7 @@ export default function CropRecommendation() {
   const [results, setResults] = useState<typeof MOCK_CROPS | null>(null);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (key: string, val: string) =>
     setValues((prev) => ({ ...prev, [key]: val }));
@@ -292,12 +296,33 @@ export default function CropRecommendation() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button style={{ padding: 8, background: "none", border: "none", cursor: "pointer", borderRadius: 8 }}>
+            {/* <button style={{ padding: 8, background: "none", border: "none", cursor: "pointer", borderRadius: 8 }}>
               <Bell size={16} color={THEME.fgMuted} />
-            </button>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: THEME.primaryDim, border: `1px solid ${THEME.primaryBorder}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: THEME.primary }}>U</span>
-            </div>
+            </button> */}
+            <div
+  onClick={() => navigate("/")}
+  style={{
+    width: 28,
+    height: 28,
+    borderRadius: "50%",
+    background: THEME.primaryDim,
+    border: `1px solid ${THEME.primaryBorder}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer" // 👈 important for UX
+  }}
+>
+  <span
+    style={{
+      fontSize: 10,
+      fontWeight: 700,
+      color: THEME.primary
+    }}
+  >
+    U
+  </span>
+</div>
           </div>
         </div>
       </header>
